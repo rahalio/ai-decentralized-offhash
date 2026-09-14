@@ -1,0 +1,134 @@
+openapi: 3.1.0
+info:
+  title: Config cert reviews API
+  version: 0.1.0
+  description: |
+    Scheduled reviews of Fabric enrollment / config certificates for embedded PD
+    (subject DN attributes, OU leakage, etc.).
+  license:
+    name: Proprietary
+    url: https://offhash.local/license
+  x-domain: cfg
+servers:
+  - url: https://api.offhash.local
+    description: Local / starter API
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: ConfigCerts
+    description: Config and enrollment certificate reviews
+paths:
+  /v1/config-cert-reviews:
+    get:
+      operationId: listConfigCertReviews
+      tags: [ConfigCerts]
+      summary: List config / enrollment cert reviews
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [scheduled, in_progress, completed, overdue]
+        - name: networkId
+          in: query
+          schema:
+            $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+      responses:
+        '200':
+          description: Reviews page
+          content:
+            application/json:
+              schema:
+                $ref: ./configcerts.schemas.yaml#/components/schemas/ConfigCertReviewListResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: createConfigCertReview
+      tags: [ConfigCerts]
+      summary: Schedule a config / enrollment cert review
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./configcerts.schemas.yaml#/components/schemas/ConfigCertReviewCreateRequest
+      responses:
+        '201':
+          description: Review scheduled
+          content:
+            application/json:
+              schema:
+                $ref: ./configcerts.schemas.yaml#/components/schemas/ConfigCertReviewResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/config-cert-reviews/{reviewId}:
+    get:
+      operationId: getConfigCertReview
+      tags: [ConfigCerts]
+      summary: Get config cert review by id
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/ConfigCertReviewIdPath
+      responses:
+        '200':
+          description: Review
+          content:
+            application/json:
+              schema:
+                $ref: ./configcerts.schemas.yaml#/components/schemas/ConfigCertReviewResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/config-cert-reviews/{reviewId}/complete:
+    post:
+      operationId: completeConfigCertReview
+      tags: [ConfigCerts]
+      summary: Complete a config cert review with findings
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/ConfigCertReviewIdPath
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./configcerts.schemas.yaml#/components/schemas/CompleteConfigCertReviewRequest
+      responses:
+        '200':
+          description: Review completed
+          content:
+            application/json:
+              schema:
+                $ref: ./configcerts.schemas.yaml#/components/schemas/ConfigCertReviewResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        '409':
+          $ref: ./common/responses.yaml#/components/responses/Conflict
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+components:
+  securitySchemes:
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth

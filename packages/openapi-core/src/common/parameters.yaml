@@ -1,0 +1,107 @@
+openapi: 3.1.0
+info:
+  title: Shared parameters
+  version: 0.1.0
+  description: Path and header parameters shared across domain APIs.
+paths: {}
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        Client-supplied key for safe retries on mutating POSTs (≤128 chars).
+        Replay with the same key and body returns the original result; different
+        body with the same key yields 409.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    TenantIdPath:
+      name: tenantId
+      in: path
+      required: true
+      description: Tenant id (`tnt_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/TenantId
+    UserIdPath:
+      name: userId
+      in: path
+      required: true
+      description: User id (`usr_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/UserId
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque keyset cursor from a previous page.
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Page size (default 50, max 200).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    PolicyIdPath:
+      name: policyId
+      in: path
+      required: true
+      description: Fabric policy id (`pol_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/PolicyId
+    ScanIdPath:
+      name: scanId
+      in: path
+      required: true
+      description: PD scan id (`scn_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/ScanId
+    HashIdPath:
+      name: hashId
+      in: path
+      required: true
+      description: Salted hash record id (`hsh_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/HashId
+    ErasureJobIdPath:
+      name: jobId
+      in: path
+      required: true
+      description: Erasure job id (`ers_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/ErasureJobId
+    DrillIdPath:
+      name: drillId
+      in: path
+      required: true
+      description: Erasure drill id (`drl_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/DrillId
+    AntiPatternIdPath:
+      name: flagId
+      in: path
+      required: true
+      description: Anti-pattern flag id (`apn_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/AntiPatternId
+    PeerIdPath:
+      name: peerId
+      in: path
+      required: true
+      description: Endorsement peer id (`peer_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/PeerId
+    ConfigCertReviewIdPath:
+      name: reviewId
+      in: path
+      required: true
+      description: Config cert review id (`cfg_…`).
+      schema:
+        $ref: ./primitives.yaml#/components/schemas/ConfigCertReviewId

@@ -1,0 +1,30 @@
+{
+  "name": "offhash",
+  "version": "0.1.0",
+  "description": "Offhash — Fabric PD architecture guard (OpenAPI-first DDD)",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:openapi": "pnpm --filter @offhash/openapi-core lint:domains",
+    "bundle:openapi": "pnpm --filter @offhash/openapi-core bundle:domains",
+    "build": "pnpm --filter @offhash/core build && pnpm --filter @offhash/services build && pnpm --filter @offhash/adapters build && pnpm --filter @offhash/api-server build",
+    "dev:api": "pnpm --filter @offhash/api-server dev",
+    "dev:web": "pnpm --filter @offhash/webapp dev",
+    "codegen:core": "node scripts/sync-codegen-paths.mjs && PYTHONPATH=.codegen/codegen/src python3 -m zero_codegen.cli.main generate --all --layers core --config .codegen/.zero-codegen-merged.json --skip-build",
+    "codegen:identity": "node scripts/sync-codegen-paths.mjs && PYTHONPATH=.codegen/codegen/src python3 -m zero_codegen.cli.main generate --domain identity --config .codegen/.zero-codegen-merged.json --skip-build",
+    "codegen:paths": "node scripts/sync-codegen-paths.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.55.0"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9.0.0"
+  }
+}

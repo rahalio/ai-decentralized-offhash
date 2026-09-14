@@ -1,0 +1,107 @@
+openapi: 3.1.0
+info:
+  title: Reporting schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    FabricComplianceReport:
+      type: object
+      required:
+        - period
+        - proposalsBlocked
+        - pdcFlags
+        - erasuresCompleted
+        - orphanedHashes
+      properties:
+        period:
+          type: string
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        proposalsBlocked:
+          type: integer
+          minimum: 0
+        pdcFlags:
+          type: integer
+          minimum: 0
+        encryptOnChainFlags:
+          type: integer
+          minimum: 0
+        clientCertPdFlags:
+          type: integer
+          minimum: 0
+        erasuresCompleted:
+          type: integer
+          minimum: 0
+        orphanedHashes:
+          type: integer
+          minimum: 0
+        erasureDrillPassRate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Fraction of drills with result=pass in the period.
+        peersQuarantined:
+          type: integer
+          minimum: 0
+
+    DpiaExportCreateRequest:
+      type: object
+      required: [period]
+      properties:
+        period:
+          type: string
+          description: ISO period or preset for the pack.
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        includeHashMap:
+          type: boolean
+          default: true
+        includeErasureDrills:
+          type: boolean
+          default: true
+        includeViolations:
+          type: boolean
+          default: true
+
+    DpiaExportJob:
+      type: object
+      required: [jobId, period, status, createdAt]
+      properties:
+        jobId:
+          $ref: ./common/primitives.yaml#/components/schemas/DpiaExportJobId
+        period:
+          type: string
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        status:
+          $ref: ./common/primitives.yaml#/components/schemas/JobStatus
+        downloadUrl:
+          type: string
+          format: uri
+        errorMessage:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    FabricComplianceReportResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/FabricComplianceReport'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    DpiaExportJobResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/DpiaExportJob'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

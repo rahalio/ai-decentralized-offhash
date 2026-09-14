@@ -1,0 +1,169 @@
+openapi: 3.1.0
+info:
+  title: Erasures schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    ErasureJobStatus:
+      type: string
+      enum: [queued, running, done, failed]
+
+    DrillResult:
+      type: string
+      enum: [pass, fail, pending]
+
+    OrphanizationProof:
+      type: object
+      required: [jobId, hashId, offChainDeleted, orphanedAt, proofHash]
+      properties:
+        jobId:
+          $ref: ./common/primitives.yaml#/components/schemas/ErasureJobId
+        hashId:
+          $ref: ./common/primitives.yaml#/components/schemas/HashId
+        offChainDeleted:
+          type: boolean
+        orphanedAt:
+          type: string
+          format: date-time
+        proofHash:
+          type: string
+          description: Integrity hash of the orphanization evidence package.
+
+    ErasureJob:
+      type: object
+      required: [jobId, hashId, erasureReason, status, createdAt]
+      properties:
+        jobId:
+          $ref: ./common/primitives.yaml#/components/schemas/ErasureJobId
+        hashId:
+          $ref: ./common/primitives.yaml#/components/schemas/HashId
+        pdRecordId:
+          $ref: ./common/primitives.yaml#/components/schemas/PdRecordId
+        erasureReason:
+          type: string
+        status:
+          $ref: '#/components/schemas/ErasureJobStatus'
+        proof:
+          $ref: '#/components/schemas/OrphanizationProof'
+        errorMessage:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    ErasureJobCreateRequest:
+      type: object
+      required: [hashId, erasureReason]
+      properties:
+        hashId:
+          $ref: ./common/primitives.yaml#/components/schemas/HashId
+        erasureReason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        pdRecordId:
+          $ref: ./common/primitives.yaml#/components/schemas/PdRecordId
+
+    ErasureDrill:
+      type: object
+      required: [drillId, networkId, result, createdAt]
+      properties:
+        drillId:
+          $ref: ./common/primitives.yaml#/components/schemas/DrillId
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+        hashId:
+          $ref: ./common/primitives.yaml#/components/schemas/HashId
+        jobId:
+          $ref: ./common/primitives.yaml#/components/schemas/ErasureJobId
+        result:
+          $ref: '#/components/schemas/DrillResult'
+        notes:
+          type: string
+        proof:
+          $ref: '#/components/schemas/OrphanizationProof'
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    ErasureDrillCreateRequest:
+      type: object
+      required: [networkId]
+      properties:
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+        hashId:
+          $ref: ./common/primitives.yaml#/components/schemas/HashId
+          description: Optional specific hash to drill; otherwise platform picks a fixture.
+        notes:
+          type: string
+          maxLength: 1000
+
+    ErasureJobResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ErasureJob'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    ErasureJobListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErasureJob'
+        nextCursor:
+          type: string
+
+    ErasureJobListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ErasureJobListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    ErasureDrillResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ErasureDrill'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    ErasureDrillListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErasureDrill'
+        nextCursor:
+          type: string
+
+    ErasureDrillListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ErasureDrillListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

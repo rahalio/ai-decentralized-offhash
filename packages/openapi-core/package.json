@@ -1,0 +1,18 @@
+{
+  "name": "@offhash/openapi-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenAPI contracts for Offhash (common + identity + product domains)",
+  "scripts": {
+    "lint:domains": "redocly lint",
+    "bundle:domains": "mkdir -p src/.bundled && redocly bundle identity --output src/.bundled/identity.openapi.yaml && redocly bundle identity --output src/.bundled/identity.json && redocly bundle policies --output src/.bundled/policies.openapi.yaml && redocly bundle policies --output src/.bundled/policies.json && redocly bundle scans --output src/.bundled/scans.openapi.yaml && redocly bundle scans --output src/.bundled/scans.json && redocly bundle hashes --output src/.bundled/hashes.openapi.yaml && redocly bundle hashes --output src/.bundled/hashes.json && redocly bundle erasures --output src/.bundled/erasures.openapi.yaml && redocly bundle erasures --output src/.bundled/erasures.json && redocly bundle antipatterns --output src/.bundled/antipatterns.openapi.yaml && redocly bundle antipatterns --output src/.bundled/antipatterns.json && redocly bundle endorsement --output src/.bundled/endorsement.openapi.yaml && redocly bundle endorsement --output src/.bundled/endorsement.json && redocly bundle configcerts --output src/.bundled/configcerts.openapi.yaml && redocly bundle configcerts --output src/.bundled/configcerts.json && redocly bundle reporting --output src/.bundled/reporting.openapi.yaml && redocly bundle reporting --output src/.bundled/reporting.json",
+    "lint": "pnpm run lint:domains",
+    "bundle": "pnpm run bundle:domains"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.34.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

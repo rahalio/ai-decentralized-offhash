@@ -1,0 +1,19 @@
+{
+  "name": "@offhash/tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vitest shared helpers for Offhash platform tests",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@offhash/core": "workspace:*",
+    "@offhash/services": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.9"
+  }
+}

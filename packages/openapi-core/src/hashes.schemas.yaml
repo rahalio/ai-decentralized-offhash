@@ -1,0 +1,89 @@
+openapi: 3.1.0
+info:
+  title: Hash records schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    SaltedHashStatus:
+      type: string
+      enum: [linked, orphaned]
+
+    SaltedHashRecord:
+      type: object
+      required:
+        - hashId
+        - saltedHash
+        - offChainStoreRef
+        - pdRecordId
+        - status
+        - createdAt
+      properties:
+        hashId:
+          $ref: ./common/primitives.yaml#/components/schemas/HashId
+        saltedHash:
+          type: string
+          description: Hex or base64 salted hash written (or intended) on-chain.
+        offChainStoreRef:
+          type: string
+          description: Opaque locator for the mutable off-chain PD store entry.
+        pdRecordId:
+          $ref: ./common/primitives.yaml#/components/schemas/PdRecordId
+        status:
+          $ref: '#/components/schemas/SaltedHashStatus'
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+        createdAt:
+          type: string
+          format: date-time
+        orphanedAt:
+          type: string
+          format: date-time
+
+    SaltedHashRegisterRequest:
+      type: object
+      required: [saltedHash, offChainStoreRef, pdRecordId]
+      properties:
+        saltedHash:
+          type: string
+          minLength: 1
+        offChainStoreRef:
+          type: string
+          minLength: 1
+        pdRecordId:
+          $ref: ./common/primitives.yaml#/components/schemas/PdRecordId
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+
+    SaltedHashRecordResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/SaltedHashRecord'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    SaltedHashRecordListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaltedHashRecord'
+        nextCursor:
+          type: string
+
+    SaltedHashRecordListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/SaltedHashRecordListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

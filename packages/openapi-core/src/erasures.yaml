@@ -1,0 +1,171 @@
+openapi: 3.1.0
+info:
+  title: Erasures API
+  version: 0.1.0
+  description: |
+    Off-chain personal-data erasure with hash orphanization proofs, plus
+    Article 17 erasure drills (pass/fail) for compliance evidence.
+  license:
+    name: Proprietary
+    url: https://offhash.local/license
+  x-domain: ers
+servers:
+  - url: https://api.offhash.local
+    description: Local / starter API
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Erasures
+    description: Off-chain delete and hash orphanization
+  - name: ErasureDrills
+    description: Scheduled / ad-hoc Article 17 erasure drills
+paths:
+  /v1/erasures:
+    get:
+      operationId: listErasureJobs
+      tags: [Erasures]
+      summary: List erasure jobs
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [queued, running, done, failed]
+      responses:
+        '200':
+          description: Erasure jobs page
+          content:
+            application/json:
+              schema:
+                $ref: ./erasures.schemas.yaml#/components/schemas/ErasureJobListResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: executePdErasure
+      tags: [Erasures]
+      summary: Execute off-chain PD erasure and orphan the linked hash
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./erasures.schemas.yaml#/components/schemas/ErasureJobCreateRequest
+      responses:
+        '202':
+          description: Erasure job accepted
+          content:
+            application/json:
+              schema:
+                $ref: ./erasures.schemas.yaml#/components/schemas/ErasureJobResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/erasures/{jobId}:
+    get:
+      operationId: getErasureJob
+      tags: [Erasures]
+      summary: Get erasure job status and orphanization proof when available
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/ErasureJobIdPath
+      responses:
+        '200':
+          description: Erasure job
+          content:
+            application/json:
+              schema:
+                $ref: ./erasures.schemas.yaml#/components/schemas/ErasureJobResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/erasure-drills:
+    get:
+      operationId: listErasureDrills
+      tags: [ErasureDrills]
+      summary: List erasure drills
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: result
+          in: query
+          schema:
+            type: string
+            enum: [pass, fail, pending]
+      responses:
+        '200':
+          description: Drills page
+          content:
+            application/json:
+              schema:
+                $ref: ./erasures.schemas.yaml#/components/schemas/ErasureDrillListResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: createErasureDrill
+      tags: [ErasureDrills]
+      summary: Start an Article 17 erasure drill
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./erasures.schemas.yaml#/components/schemas/ErasureDrillCreateRequest
+      responses:
+        '201':
+          description: Drill created
+          content:
+            application/json:
+              schema:
+                $ref: ./erasures.schemas.yaml#/components/schemas/ErasureDrillResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/erasure-drills/{drillId}:
+    get:
+      operationId: getErasureDrill
+      tags: [ErasureDrills]
+      summary: Get erasure drill result (pass/fail)
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/DrillIdPath
+      responses:
+        '200':
+          description: Drill
+          content:
+            application/json:
+              schema:
+                $ref: ./erasures.schemas.yaml#/components/schemas/ErasureDrillResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+components:
+  securitySchemes:
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth

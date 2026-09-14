@@ -1,0 +1,114 @@
+openapi: 3.1.0
+info:
+  title: Config cert reviews schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    ConfigCertReviewStatus:
+      type: string
+      enum: [scheduled, in_progress, completed, overdue]
+
+    ConfigCertFinding:
+      type: object
+      required: [severity, message]
+      properties:
+        severity:
+          type: string
+          enum: [info, warn, critical]
+        message:
+          type: string
+        subjectDn:
+          type: string
+        attribute:
+          type: string
+          description: Certificate attribute that contained PD (e.g. CN, emailAddress).
+
+    ConfigCertReview:
+      type: object
+      required:
+        - reviewId
+        - networkId
+        - scheduledAt
+        - status
+        - subjectBoundCertCount
+      properties:
+        reviewId:
+          $ref: ./common/primitives.yaml#/components/schemas/ConfigCertReviewId
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        scheduledAt:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/ConfigCertReviewStatus'
+        subjectBoundCertCount:
+          type: integer
+          minimum: 0
+          description: Count of enrollment certs with subject-bound identity attributes.
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigCertFinding'
+        completedAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+
+    ConfigCertReviewCreateRequest:
+      type: object
+      required: [networkId, scheduledAt]
+      properties:
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        scheduledAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          maxLength: 1000
+
+    CompleteConfigCertReviewRequest:
+      type: object
+      required: [subjectBoundCertCount]
+      properties:
+        subjectBoundCertCount:
+          type: integer
+          minimum: 0
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigCertFinding'
+        notes:
+          type: string
+          maxLength: 2000
+
+    ConfigCertReviewResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ConfigCertReview'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    ConfigCertReviewListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigCertReview'
+        nextCursor:
+          type: string
+
+    ConfigCertReviewListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ConfigCertReviewListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

@@ -1,0 +1,119 @@
+openapi: 3.1.0
+info:
+  title: Shared primitives
+  version: 0.1.0
+  description: Prefixed IDs and money types shared across domains.
+paths: {}
+components:
+  schemas:
+    TenantId:
+      type: string
+      description: Prefixed ULID-style tenant identifier.
+      pattern: '^tnt_[0-9A-HJKMNP-TV-Z]{26}$'
+      example: tnt_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    UserId:
+      type: string
+      description: Prefixed ULID-style tenant operator user identifier.
+      pattern: '^usr_[0-9A-HJKMNP-TV-Z]{26}$'
+      example: usr_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    Currency:
+      type: string
+      description: ISO 4217 currency code.
+      minLength: 3
+      maxLength: 3
+      pattern: '^[A-Z]{3}$'
+      example: USD
+    Money:
+      type: object
+      description: Decimal-string amount + currency (never IEEE float).
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: string
+          description: Signed decimal string with up to 5 fractional digits.
+          pattern: '^-?\d+(\.\d{1,5})?$'
+          example: "1234.56"
+        currency:
+          $ref: '#/components/schemas/Currency'
+    JobStatus:
+      type: string
+      description: Generic async job lifecycle.
+      enum:
+        - queued
+        - running
+        - done
+        - failed
+
+    # Offhash product IDs
+    PolicyId:
+      type: string
+      pattern: '^pol_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Fabric PD enforcement policy id.
+      example: pol_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    ScanId:
+      type: string
+      pattern: '^scn_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Proposal PD scan result id.
+      example: scn_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    HashId:
+      type: string
+      pattern: '^hsh_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Salted hash record id.
+      example: hsh_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    ErasureJobId:
+      type: string
+      pattern: '^ers_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Off-chain PD erasure job id.
+      example: ers_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    DrillId:
+      type: string
+      pattern: '^drl_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Article 17 erasure drill id.
+      example: drl_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    AntiPatternId:
+      type: string
+      pattern: '^apn_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Anti-pattern flag id.
+      example: apn_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    PeerId:
+      type: string
+      pattern: '^peer_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Fabric endorsement peer hook id.
+      example: peer_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    ConfigCertReviewId:
+      type: string
+      pattern: '^cfg_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Config / enrollment cert review id.
+      example: cfg_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    NetworkId:
+      type: string
+      pattern: '^net_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Fabric network identifier.
+      example: net_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    ChannelId:
+      type: string
+      minLength: 1
+      maxLength: 128
+      description: Fabric channel identifier (opaque string).
+    PdRecordId:
+      type: string
+      pattern: '^pdr_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Off-chain personal-data record id.
+      example: pdr_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    DpiaExportJobId:
+      type: string
+      pattern: '^dpi_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: DPIA / counsel export job id.
+      example: dpi_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    EndorsementDecisionId:
+      type: string
+      pattern: '^end_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Endorsement allow/deny decision id.
+      example: end_01HZYXK8J0M0W5N6P7Q8R9S0T1U2
+    OrgId:
+      type: string
+      pattern: '^org_[0-9A-HJKMNP-TV-Z]{26}$'
+      description: Fabric MSP / organization id.
+      example: org_01HZYXK8J0M0W5N6P7Q8R9S0T1U2

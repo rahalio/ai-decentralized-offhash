@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-ink: #e8eef4;
+  --color-ink-950: #0b1118;
+  --color-steel-900: #141c28;
+  --color-steel-700: #2c3a4c;
+  --color-assay: #4db6a0;
+  --color-assay-dim: #1f6b5c;
+  --color-amber: #d9a441;
+  --color-coral: #e0574f;
+  --color-steel: #7a90a6;
+  --color-brand: #a8d5c8;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--color-ink-950);
+  color: var(--color-ink);
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse at top, rgba(77, 182, 160, 0.07), transparent 55%),
+    linear-gradient(180deg, #0b1118 0%, #101820 100%);
+}
+
+.block-grid {
+  background-image:
+    linear-gradient(rgba(122, 144, 166, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 144, 166, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}

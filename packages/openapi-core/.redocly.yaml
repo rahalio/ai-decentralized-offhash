@@ -1,0 +1,36 @@
+apis:
+  identity:
+    root: src/identity.yaml
+  policies:
+    root: src/policies.yaml
+  scans:
+    root: src/scans.yaml
+  hashes:
+    root: src/hashes.yaml
+  erasures:
+    root: src/erasures.yaml
+  antipatterns:
+    root: src/antipatterns.yaml
+  endorsement:
+    root: src/endorsement.yaml
+  configcerts:
+    root: src/configcerts.yaml
+  reporting:
+    root: src/reporting.yaml
+
+extends:
+  - recommended
+
+rules:
+  no-unused-components: off
+  operation-4xx-response: warn
+  info-license: off
+  info-license-url: off
+  tag-description: off
+  operation-operationId: error
+  no-invalid-media-type-examples: off
+
+theme:
+  openapi:
+    generateCodeSamples:
+      languages: []

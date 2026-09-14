@@ -1,0 +1,237 @@
+openapi: 3.1.0
+info:
+  title: Policies schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    FabricPolicyStatus:
+      type: string
+      enum: [draft, published, archived]
+
+    Fab5097PdcMode:
+      type: string
+      description: FAB-5097 private-data-collection enforcement mode.
+      enum: [off, preview, on]
+
+    FieldCoverage:
+      type: object
+      description: Which Fabric proposal surfaces the scanner must cover.
+      properties:
+        proposalPayload:
+          type: boolean
+        clientCertificate:
+          type: boolean
+        stateKeys:
+          type: boolean
+        stateValues:
+          type: boolean
+        events:
+          type: boolean
+        chaincodeResponse:
+          type: boolean
+        readSets:
+          type: boolean
+
+    FabricPolicy:
+      type: object
+      required:
+        - policyId
+        - networkId
+        - channelId
+        - fabricVersion
+        - failClosed
+        - saltRequired
+        - status
+        - createdAt
+      properties:
+        policyId:
+          $ref: ./common/primitives.yaml#/components/schemas/PolicyId
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+        fabricVersion:
+          type: string
+          description: Target Hyperledger Fabric version (e.g. 2.5).
+        failClosed:
+          type: boolean
+          description: When true, unscannable / unknown surfaces block endorsement.
+        saltRequired:
+          type: boolean
+          default: true
+        allowPdcWithBlockToLive:
+          type: boolean
+          description: Allow PDC only when block-to-live guarantees eventual purge.
+        fab5097PdcMode:
+          $ref: '#/components/schemas/Fab5097PdcMode'
+        fieldCoverage:
+          $ref: '#/components/schemas/FieldCoverage'
+        status:
+          $ref: '#/components/schemas/FabricPolicyStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    FabricPolicyCreateRequest:
+      type: object
+      required: [networkId, channelId, fabricVersion]
+      properties:
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+        fabricVersion:
+          type: string
+        failClosed:
+          type: boolean
+          default: true
+        saltRequired:
+          type: boolean
+          default: true
+        allowPdcWithBlockToLive:
+          type: boolean
+          default: false
+        fab5097PdcMode:
+          $ref: '#/components/schemas/Fab5097PdcMode'
+        fieldCoverage:
+          $ref: '#/components/schemas/FieldCoverage'
+
+    FabricPolicyUpdateRequest:
+      type: object
+      properties:
+        fabricVersion:
+          type: string
+        failClosed:
+          type: boolean
+        saltRequired:
+          type: boolean
+        allowPdcWithBlockToLive:
+          type: boolean
+        fab5097PdcMode:
+          $ref: '#/components/schemas/Fab5097PdcMode'
+        fieldCoverage:
+          $ref: '#/components/schemas/FieldCoverage'
+        status:
+          $ref: '#/components/schemas/FabricPolicyStatus'
+
+    FabricPolicySimulateFields:
+      type: object
+      description: Field surfaces for policy simulation (mirrors ProposalScanFields).
+      properties:
+        proposalPayload:
+          type: string
+        clientCertificate:
+          type: string
+        stateKeys:
+          type: array
+          items:
+            type: string
+        stateValues:
+          type: array
+          items:
+            type: string
+        events:
+          type: array
+          items:
+            type: string
+        chaincodeResponse:
+          type: string
+        readSets:
+          type: array
+          items:
+            type: string
+
+    FabricPolicySimulateRequest:
+      type: object
+      required: [proposalRef, fields]
+      properties:
+        proposalRef:
+          type: string
+          minLength: 1
+          maxLength: 256
+        fields:
+          $ref: '#/components/schemas/FabricPolicySimulateFields'
+
+    PolicySimulatePdHit:
+      type: object
+      required: [fieldPath, fabricSurface]
+      properties:
+        fieldPath:
+          type: string
+        fabricSurface:
+          type: string
+          enum:
+            - proposalPayload
+            - clientCertificate
+            - stateKeys
+            - stateValues
+            - events
+            - chaincodeResponse
+            - readSets
+            - privateDataCollection
+            - transientData
+        hint:
+          type: string
+
+    PolicySimulateSummary:
+      type: object
+      description: PdScanResult-like summary from policy simulation (no persisted scan).
+      required: [proposalRef, decision, endorsementAllowed]
+      properties:
+        proposalRef:
+          type: string
+        decision:
+          type: string
+          enum: [allow, block, remediate]
+        endorsementAllowed:
+          type: boolean
+        pdHits:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicySimulatePdHit'
+        remediationHints:
+          type: array
+          items:
+            type: string
+
+    FabricPolicyResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/FabricPolicy'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    FabricPolicyListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FabricPolicy'
+        nextCursor:
+          type: string
+
+    FabricPolicyListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/FabricPolicyListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    FabricPolicySimulateResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/PolicySimulateSummary'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

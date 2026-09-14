@@ -1,0 +1,108 @@
+openapi: 3.1.0
+info:
+  title: Scans API
+  version: 0.1.0
+  description: |
+    Pre-endorsement transaction proposal field scanning for personal data.
+    Peer plugins typically call with X-API-Key; console uses Bearer JWT.
+  license:
+    name: Proprietary
+    url: https://offhash.local/license
+  x-domain: scn
+servers:
+  - url: https://api.offhash.local
+    description: Local / starter API
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Scans
+    description: Pre-endorsement proposal field scanning
+paths:
+  /v1/scans:
+    post:
+      operationId: scanTransactionProposal
+      tags: [Scans]
+      summary: Scan a transaction proposal for personal data
+      description: Preferred auth is ApiKey (peer endorsement plugin); Bearer also accepted.
+      security:
+        - apiKey: []
+        - bearerAuth: []
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./scans.schemas.yaml#/components/schemas/ProposalScanRequest
+      responses:
+        '200':
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                $ref: ./scans.schemas.yaml#/components/schemas/PdScanResultResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '422':
+          $ref: ./common/responses.yaml#/components/responses/UnprocessableEntity
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    get:
+      operationId: listPdScans
+      tags: [Scans]
+      summary: List PD scan results
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: decision
+          in: query
+          schema:
+            type: string
+            enum: [allow, block, remediate]
+        - name: proposalRef
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Scans page
+          content:
+            application/json:
+              schema:
+                $ref: ./scans.schemas.yaml#/components/schemas/PdScanResultListResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/scans/{scanId}:
+    get:
+      operationId: getPdScanResult
+      tags: [Scans]
+      summary: Get PD scan result by id
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/ScanIdPath
+      responses:
+        '200':
+          description: Scan result
+          content:
+            application/json:
+              schema:
+                $ref: ./scans.schemas.yaml#/components/schemas/PdScanResultResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+components:
+  securitySchemes:
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth

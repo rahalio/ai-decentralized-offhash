@@ -1,0 +1,140 @@
+openapi: 3.1.0
+info:
+  title: Scans schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    FabricSurface:
+      type: string
+      description: Fabric proposal surface where PD was detected.
+      enum:
+        - proposalPayload
+        - clientCertificate
+        - stateKeys
+        - stateValues
+        - events
+        - chaincodeResponse
+        - readSets
+        - privateDataCollection
+        - transientData
+
+    ScanDecision:
+      type: string
+      enum: [allow, block, remediate]
+
+    ProposalScanFields:
+      type: object
+      description: Field surfaces extracted from a Fabric transaction proposal.
+      properties:
+        proposalPayload:
+          type: string
+        clientCertificate:
+          type: string
+        stateKeys:
+          type: array
+          items:
+            type: string
+        stateValues:
+          type: array
+          items:
+            type: string
+        events:
+          type: array
+          items:
+            type: string
+        chaincodeResponse:
+          type: string
+        readSets:
+          type: array
+          items:
+            type: string
+
+    ProposalScanRequest:
+      type: object
+      required: [proposalRef, fields]
+      properties:
+        proposalRef:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Opaque client/plugin reference for the proposal under scan.
+        policyId:
+          $ref: ./common/primitives.yaml#/components/schemas/PolicyId
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+        fields:
+          $ref: '#/components/schemas/ProposalScanFields'
+
+    PdHit:
+      type: object
+      required: [fieldPath, fabricSurface]
+      properties:
+        fieldPath:
+          type: string
+          description: JSON-pointer or dotted path within the scanned surface.
+        fabricSurface:
+          $ref: '#/components/schemas/FabricSurface'
+        hint:
+          type: string
+          description: Short remediation / classification hint for architects.
+
+    PdScanResult:
+      type: object
+      required:
+        - scanId
+        - proposalRef
+        - decision
+        - endorsementAllowed
+        - createdAt
+      properties:
+        scanId:
+          $ref: ./common/primitives.yaml#/components/schemas/ScanId
+        proposalRef:
+          type: string
+        decision:
+          $ref: '#/components/schemas/ScanDecision'
+        endorsementAllowed:
+          type: boolean
+        pdHits:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdHit'
+        remediationHints:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PdScanResultResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/PdScanResult'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    PdScanResultListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdScanResult'
+        nextCursor:
+          type: string
+
+    PdScanResultListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/PdScanResultListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

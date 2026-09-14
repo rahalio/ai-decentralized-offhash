@@ -1,0 +1,132 @@
+openapi: 3.1.0
+info:
+  title: Endorsement API
+  version: 0.1.0
+  description: |
+    Fabric peer endorsement plugin health, quarantine, and decision audit trail.
+  license:
+    name: Proprietary
+    url: https://offhash.local/license
+  x-domain: end
+servers:
+  - url: https://api.offhash.local
+    description: Local / starter API
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Endorsement
+    description: Peer hooks and endorsement decisions
+paths:
+  /v1/endorsement/peers:
+    get:
+      operationId: listEndorsementPeers
+      tags: [Endorsement]
+      summary: List endorsement peer hooks
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [healthy, missing, quarantined]
+        - name: orgId
+          in: query
+          schema:
+            $ref: ./common/primitives.yaml#/components/schemas/OrgId
+      responses:
+        '200':
+          description: Peers page
+          content:
+            application/json:
+              schema:
+                $ref: ./endorsement.schemas.yaml#/components/schemas/PeerHookListResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/endorsement/peers/{peerId}:
+    get:
+      operationId: getEndorsementPeer
+      tags: [Endorsement]
+      summary: Get endorsement peer hook by id
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/PeerIdPath
+      responses:
+        '200':
+          description: Peer hook
+          content:
+            application/json:
+              schema:
+                $ref: ./endorsement.schemas.yaml#/components/schemas/PeerHookResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/endorsement/peers/{peerId}/quarantine:
+    post:
+      operationId: quarantineEndorsementPeer
+      tags: [Endorsement]
+      summary: Quarantine a peer plugin (fail closed for that peer)
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/PeerIdPath
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./endorsement.schemas.yaml#/components/schemas/QuarantinePeerRequest
+      responses:
+        '200':
+          description: Peer quarantined
+          content:
+            application/json:
+              schema:
+                $ref: ./endorsement.schemas.yaml#/components/schemas/PeerHookResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/endorsement/decisions:
+    get:
+      operationId: listEndorsementDecisions
+      tags: [Endorsement]
+      summary: List recent endorsement allow/deny decisions
+      x-maturity: stub
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: decision
+          in: query
+          schema:
+            type: string
+            enum: [allow, deny]
+      responses:
+        '200':
+          description: Decisions page
+          content:
+            application/json:
+              schema:
+                $ref: ./endorsement.schemas.yaml#/components/schemas/EndorsementDecisionListResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+components:
+  securitySchemes:
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth

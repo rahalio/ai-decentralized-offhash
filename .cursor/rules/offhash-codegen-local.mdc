@@ -1,0 +1,21 @@
+---
+description: Never commit or push .codegen — local zero-codegen tooling only
+globs:
+  - .codegen/**/*
+alwaysApply: true
+---
+
+# `.codegen` must never be committed or pushed
+
+- The `.codegen/` directory (zero-codegen Python tool, merged config, teaching examples) is **local-only**.
+- It is listed in `.gitignore` and must **never** be committed or pushed to GitHub.
+- Do not `git add -f .codegen` or suggest committing it.
+- If `.codegen/` is missing, rehydrate from the scaffold:
+
+```bash
+SCAFFOLD=/Users/nrahal/@code/zero-apps/zero-apps-codegen-scaffold
+rsync -a --delete "$SCAFFOLD/.codegen/" ./.codegen/
+# then re-apply @offhash package_scope and product domains in:
+#   .codegen/zero-codegen.json
+#   .codegen/.zero-codegen-merged.json
+```

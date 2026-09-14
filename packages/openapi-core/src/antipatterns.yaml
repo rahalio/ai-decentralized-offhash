@@ -1,0 +1,135 @@
+openapi: 3.1.0
+info:
+  title: Anti-patterns API
+  version: 0.1.0
+  description: |
+    Flags for PDC (FAB-1151), encrypt-on-chain, and client-certificate PD patterns.
+    Supports time-bounded risk acceptance for architect exceptions.
+  license:
+    name: Proprietary
+    url: https://offhash.local/license
+  x-domain: apn
+servers:
+  - url: https://api.offhash.local
+    description: Local / starter API
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: AntiPatterns
+    description: PDC, encrypt-on-chain, and cert PD flags
+paths:
+  /v1/anti-patterns:
+    get:
+      operationId: listAntiPatternFlags
+      tags: [AntiPatterns]
+      summary: List anti-pattern flags
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: patternType
+          in: query
+          schema:
+            type: string
+            enum: [private_data_collection, encrypt_on_chain, client_cert_pd]
+        - name: compliant
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Flags page
+          content:
+            application/json:
+              schema:
+                $ref: ./antipatterns.schemas.yaml#/components/schemas/AntiPatternFlagListResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: flagAntiPattern
+      tags: [AntiPatterns]
+      summary: Flag a Fabric anti-pattern occurrence
+      security:
+        - apiKey: []
+        - bearerAuth: []
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./antipatterns.schemas.yaml#/components/schemas/AntiPatternFlagCreateRequest
+      responses:
+        '201':
+          description: Anti-pattern flagged
+          content:
+            application/json:
+              schema:
+                $ref: ./antipatterns.schemas.yaml#/components/schemas/AntiPatternFlagResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/anti-patterns/{flagId}:
+    get:
+      operationId: getAntiPatternFlag
+      tags: [AntiPatterns]
+      summary: Get anti-pattern flag by id
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/AntiPatternIdPath
+      responses:
+        '200':
+          description: Flag
+          content:
+            application/json:
+              schema:
+                $ref: ./antipatterns.schemas.yaml#/components/schemas/AntiPatternFlagResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/anti-patterns/{flagId}/accept-risk:
+    post:
+      operationId: acceptAntiPatternRisk
+      tags: [AntiPatterns]
+      summary: Accept residual risk for a flagged anti-pattern (time-bounded)
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/AntiPatternIdPath
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./antipatterns.schemas.yaml#/components/schemas/AcceptAntiPatternRiskRequest
+      responses:
+        '200':
+          description: Risk acceptance recorded
+          content:
+            application/json:
+              schema:
+                $ref: ./antipatterns.schemas.yaml#/components/schemas/AntiPatternFlagResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+components:
+  securitySchemes:
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth

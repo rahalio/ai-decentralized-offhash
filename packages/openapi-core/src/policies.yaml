@@ -1,0 +1,187 @@
+openapi: 3.1.0
+info:
+  title: Policies API
+  version: 0.1.0
+  description: |
+    Fabric personal-data enforcement policies per network / channel / Fabric version.
+    Fail-closed scanning coverage, FAB-5097 PDC modes, and publish/simulate lifecycle.
+  license:
+    name: Proprietary
+    url: https://offhash.local/license
+  x-domain: pol
+servers:
+  - url: https://api.offhash.local
+    description: Local / starter API
+security:
+  - bearerAuth: []
+  - apiKey: []
+tags:
+  - name: Policies
+    description: Fabric PD enforcement policies
+paths:
+  /v1/policies:
+    get:
+      operationId: listFabricPolicies
+      tags: [Policies]
+      summary: List Fabric PD policies
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/Cursor
+        - $ref: ./common/parameters.yaml#/components/parameters/Limit
+        - name: networkId
+          in: query
+          schema:
+            $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published, archived]
+      responses:
+        '200':
+          description: Policies page
+          content:
+            application/json:
+              schema:
+                $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicyListResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    post:
+      operationId: createFabricPolicy
+      tags: [Policies]
+      summary: Create a Fabric PD enforcement policy (draft)
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicyCreateRequest
+      responses:
+        '201':
+          description: Policy created
+          content:
+            application/json:
+              schema:
+                $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicyResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '409':
+          $ref: ./common/responses.yaml#/components/responses/Conflict
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/policies/{policyId}:
+    get:
+      operationId: getFabricPolicy
+      tags: [Policies]
+      summary: Get Fabric policy by id
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/PolicyIdPath
+      responses:
+        '200':
+          description: Policy
+          content:
+            application/json:
+              schema:
+                $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicyResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+    patch:
+      operationId: updateFabricPolicy
+      tags: [Policies]
+      summary: Update a draft Fabric policy
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/PolicyIdPath
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicyUpdateRequest
+      responses:
+        '200':
+          description: Policy updated
+          content:
+            application/json:
+              schema:
+                $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicyResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        '409':
+          $ref: ./common/responses.yaml#/components/responses/Conflict
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/policies/{policyId}/publish:
+    post:
+      operationId: publishFabricPolicy
+      tags: [Policies]
+      summary: Publish a draft policy for endorsement-path enforcement
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/PolicyIdPath
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      responses:
+        '200':
+          description: Policy published
+          content:
+            application/json:
+              schema:
+                $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicyResponse
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        '409':
+          $ref: ./common/responses.yaml#/components/responses/Conflict
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+  /v1/policies/{policyId}/simulate:
+    post:
+      operationId: simulateFabricPolicy
+      tags: [Policies]
+      summary: Simulate policy against a proposal field set (no endorse side-effect)
+      parameters:
+        - $ref: ./common/parameters.yaml#/components/parameters/PolicyIdPath
+        - $ref: ./common/parameters.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicySimulateRequest
+      responses:
+        '200':
+          description: Simulation scan summary
+          content:
+            application/json:
+              schema:
+                $ref: ./policies.schemas.yaml#/components/schemas/FabricPolicySimulateResponse
+        '400':
+          $ref: ./common/responses.yaml#/components/responses/BadRequest
+        '401':
+          $ref: ./common/responses.yaml#/components/responses/Unauthorized
+        '404':
+          $ref: ./common/responses.yaml#/components/responses/NotFound
+        default:
+          $ref: ./common/responses.yaml#/components/responses/Problem
+
+components:
+  securitySchemes:
+    apiKey:
+      $ref: ./common/security.yaml#/components/securitySchemes/apiKey
+    bearerAuth:
+      $ref: ./common/security.yaml#/components/securitySchemes/bearerAuth

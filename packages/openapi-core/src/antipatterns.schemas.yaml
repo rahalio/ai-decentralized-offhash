@@ -1,0 +1,109 @@
+openapi: 3.1.0
+info:
+  title: Anti-patterns schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    AntiPatternType:
+      type: string
+      enum: [private_data_collection, encrypt_on_chain, client_cert_pd]
+
+    AntiPatternFlag:
+      type: object
+      required:
+        - flagId
+        - patternType
+        - compliant
+        - riskAccepted
+        - createdAt
+      properties:
+        flagId:
+          $ref: ./common/primitives.yaml#/components/schemas/AntiPatternId
+        patternType:
+          $ref: '#/components/schemas/AntiPatternType'
+        fabricReference:
+          type: string
+          description: Deck / Jira reference (e.g. FAB-1151).
+          example: FAB-1151
+        proposalRef:
+          type: string
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+        compliant:
+          type: boolean
+          default: false
+          description: True when the pattern has been remediated or is policy-allowed.
+        riskAccepted:
+          type: boolean
+          default: false
+        riskAcceptanceExpiresAt:
+          type: string
+          format: date-time
+        riskAcceptanceNote:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AntiPatternFlagCreateRequest:
+      type: object
+      required: [patternType, proposalRef]
+      properties:
+        patternType:
+          $ref: '#/components/schemas/AntiPatternType'
+        proposalRef:
+          type: string
+          minLength: 1
+        fabricReference:
+          type: string
+          example: FAB-1151
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        channelId:
+          $ref: ./common/primitives.yaml#/components/schemas/ChannelId
+
+    AcceptAntiPatternRiskRequest:
+      type: object
+      required: [expiresAt]
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 1000
+
+    AntiPatternFlagResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/AntiPatternFlag'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    AntiPatternFlagListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AntiPatternFlag'
+        nextCursor:
+          type: string
+
+    AntiPatternFlagListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/AntiPatternFlagListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta

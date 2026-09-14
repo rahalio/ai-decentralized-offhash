@@ -1,0 +1,112 @@
+openapi: 3.1.0
+info:
+  title: Endorsement schemas
+  version: 0.1.0
+paths: {}
+components:
+  schemas:
+    PeerHookStatus:
+      type: string
+      enum: [healthy, missing, quarantined]
+
+    PeerHook:
+      type: object
+      required: [peerId, orgId, pluginVersion, status]
+      properties:
+        peerId:
+          $ref: ./common/primitives.yaml#/components/schemas/PeerId
+        orgId:
+          $ref: ./common/primitives.yaml#/components/schemas/OrgId
+        pluginVersion:
+          type: string
+        lastHeartbeatAt:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/PeerHookStatus'
+        networkId:
+          $ref: ./common/primitives.yaml#/components/schemas/NetworkId
+        quarantineReason:
+          type: string
+        quarantinedAt:
+          type: string
+          format: date-time
+
+    QuarantinePeerRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+
+    EndorsementDecision:
+      type: object
+      required: [decisionId, peerId, proposalRef, decision, decidedAt]
+      properties:
+        decisionId:
+          $ref: ./common/primitives.yaml#/components/schemas/EndorsementDecisionId
+        peerId:
+          $ref: ./common/primitives.yaml#/components/schemas/PeerId
+        scanId:
+          $ref: ./common/primitives.yaml#/components/schemas/ScanId
+        proposalRef:
+          type: string
+        decision:
+          type: string
+          enum: [allow, deny]
+        reason:
+          type: string
+        decidedAt:
+          type: string
+          format: date-time
+
+    PeerHookResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/PeerHook'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    PeerHookListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PeerHook'
+        nextCursor:
+          type: string
+
+    PeerHookListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/PeerHookListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
+
+    EndorsementDecisionListData:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EndorsementDecision'
+        nextCursor:
+          type: string
+
+    EndorsementDecisionListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/EndorsementDecisionListData'
+        meta:
+          $ref: ./common/envelopes.yaml#/components/schemas/ResponseMeta
